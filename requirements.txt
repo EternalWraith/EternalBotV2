@@ -1,0 +1,6 @@
+psycopg2
+discord.py
+discord.py[voice]
+asyncio
+pillow
+requests
