@@ -45,7 +45,7 @@ class Lobby(commands.Cog):
                                 break
                         else:
                             self.bot.Lobbies[new.id] = \
-                                self.bot.Lobbes[member.id]
+                                self.bot.Lobbies[member.id]
                             self.bot.Lobbies.pop(member.id)
                             await before.channel.edit(
                                 name="%s#%s"
