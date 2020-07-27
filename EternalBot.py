@@ -355,7 +355,7 @@ VALUES (%s, %s, %s, %s)"""
         for c in self.Lobbies:
             lobby = self.Lobbies[c]
             code = """
-INSERT INTO Tickets (ServerID,
+INSERT INTO Lobbies (ServerID,
                     VCID,
                     OwnerID)
 VALUES (%s, %s, %s)"""
