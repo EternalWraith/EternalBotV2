@@ -208,7 +208,7 @@ class Lobby(commands.Cog):
                 delete_after=10
             )
         else:
-            if (ctx.author.id in self.bot.Lobbies):
+            if not (ctx.author.id in self.bot.Lobbies):
                 await ctx.channel.send(
                     "You don't have a lobby to ban anyone from, %s"
                     % (ctx.author.mention),
@@ -255,7 +255,7 @@ class Lobby(commands.Cog):
                 delete_after=10
             )
         else:
-            if (ctx.author.id in self.bot.Lobbies):
+            if not (ctx.author.id in self.bot.Lobbies):
                 await ctx.channel.send(
                     "You don't have a lobby to unban anyone from, %s"
                     % (ctx.author.mention),
@@ -302,7 +302,7 @@ class Lobby(commands.Cog):
                 delete_after=10
             )
         else:
-            if (ctx.author.id in self.bot.Lobbies):
+            if not (ctx.author.id in self.bot.Lobbies):
                 await ctx.channel.send(
                     "You don't have a lobby to kick anyone from, %s"
                     % (ctx.author.mention),
