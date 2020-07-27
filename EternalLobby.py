@@ -281,11 +281,11 @@ class Lobby(commands.Cog):
                 overwrites = channel.overwrites
                 if (user in overwrites):
                     if (overwrites[user] == canjoin):
-                    await ctx.channel.send(
-                        "%s, that user is not currently banned."
-                        % (ctx.author.mention),
-                        delete_after=10
-                    )
+                        await ctx.channel.send(
+                            "%s, that user is not currently banned."
+                            % (ctx.author.mention),
+                            delete_after=10
+                        )
                 else:
                     overwrites[user] = canjoin
                     await channel.edit(overwrites=overwrites)
