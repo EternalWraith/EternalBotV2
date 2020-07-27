@@ -39,6 +39,8 @@ class Lobby(commands.Cog):
                                   % (new.name))
                             if (count == 1):
                                 channel = self.bot.Lobbies[new.id]["Channel"]
+                                self.bot.Lobbies[new.id]["Owner"] = \
+                                    self.bot.get_user(new.id)
                                 new.move_to(channel)
                                 await (channel.delete())
                                 self.bot.Lobbies.pop(member.id)
@@ -229,12 +231,13 @@ class Lobby(commands.Cog):
 
                 cannotjoin = discord.PermissionOverwrite(connect=False)
                 overwrites = channel.overwrites
-                if (overwrites[user] == cannotjoin):
-                    await ctx.channel.send(
-                        "%s, that user is already banned."
-                        % (ctx.author.mention),
-                        delete_after=10
-                    )
+                if (user in overwrites):
+                    if (overwrites[user] == cannotjoin):
+                        await ctx.channel.send(
+                            "%s, that user is already banned."
+                            % (ctx.author.mention),
+                            delete_after=10
+                        )
                 else:
                     overwrites[user] = cannotjoin
                     await channel.edit(overwrites=overwrites)
@@ -276,7 +279,8 @@ class Lobby(commands.Cog):
 
                 canjoin = discord.PermissionOverwrite(connect=True)
                 overwrites = channel.overwrites
-                if (overwrites[user] == canjoin):
+                if (user in overwrites):
+                    if (overwrites[user] == canjoin):
                     await ctx.channel.send(
                         "%s, that user is not currently banned."
                         % (ctx.author.mention),
