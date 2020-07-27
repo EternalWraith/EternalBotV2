@@ -238,6 +238,14 @@ class Lobby(commands.Cog):
                             % (ctx.author.mention),
                             delete_after=10
                         )
+                    else:
+                        overwrites[user] = cannotjoin
+                        await channel.edit(overwrites=overwrites)
+                        await ctx.channel.send(
+                            "%s, that user has been banned."
+                            % (ctx.author.mention),
+                            delete_after=10
+                        )
                 else:
                     overwrites[user] = cannotjoin
                     await channel.edit(overwrites=overwrites)
@@ -283,6 +291,14 @@ class Lobby(commands.Cog):
                     if (overwrites[user] == canjoin):
                         await ctx.channel.send(
                             "%s, that user is not currently banned."
+                            % (ctx.author.mention),
+                            delete_after=10
+                        )
+                    else:
+                        overwrites[user] = canjoin
+                        await channel.edit(overwrites=overwrites)
+                        await ctx.channel.send(
+                            "%s, that user has been unbanned."
                             % (ctx.author.mention),
                             delete_after=10
                         )
