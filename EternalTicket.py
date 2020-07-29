@@ -176,6 +176,7 @@ class Ticket(commands.Cog):
                 await ctx.author.send(
                     "Your ticket is now closed. "
                     " I hope your issue was resolved!")
+                self.bot.Tickets[ctx.channel.id]["Ending"] = ending
         else:
             if (ctx.channel.id in self.bot.Tickets):
                 ticket = self.bot.Tickets[ctx.channel.id]
