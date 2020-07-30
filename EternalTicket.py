@@ -186,7 +186,7 @@ class Ticket(commands.Cog):
                         " Respond with a :lock: to close the channel"
                     )
                     await ending.add_reaction("\U0001f512")
-                    await ctx.author.send(
+                    await ticket["Owner"].send(
                         "The moderators have closed your ticket."
                         " I hope your issue was resolved!"
                     )
