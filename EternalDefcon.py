@@ -13,10 +13,10 @@ class Defcon(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        EternalTables.SetupConfigTable()
-        EternalTables.SetupLobbyTable()
-        EternalTables.SetupTicketTable()
-        EternalTables.SetupLevelTable()
+        EternalTables.SetupConfigTable(self.bot.Cursor, self.bot.Conn)
+        EternalTables.SetupLobbyTable(self.bot.Cursor, self.bot.Conn)
+        EternalTables.SetupTicketTable(self.bot.Cursor, self.bot.Conn)
+        EternalTables.SetupLevelTable(self.bot.Cursor, self.bot.Conn)
 
         print("Defcon Cog booted successfully")
 

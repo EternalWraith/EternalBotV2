@@ -1,12 +1,9 @@
 import os
-import psycopg2
 
 DATABASE_URL = os.environ['DATABASE_URL']
 
 
-def SetupConfigTable(delete=False):
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-    cursor = conn.cursor()
+def SetupConfigTable(cursor, conn, delete=False):
 
     if (delete):
         cursor.execute("""
@@ -30,16 +27,11 @@ CREATE TABLE IF NOT EXISTS Config (
 """)
     conn.commit()
 
-    cursor.close()
-    conn.close()
-
     if (delete):
         print("Table created")
 
 
-def SetupLobbyTable(delete=False):
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-    cursor = conn.cursor()
+def SetupLobbyTable(cursor, conn, delete=False):
 
     if (delete):
         cursor.execute("""
@@ -58,16 +50,11 @@ CREATE TABLE IF NOT EXISTS Lobbies (
 """)
     conn.commit()
 
-    cursor.close()
-    conn.close()
-
     if (delete):
         print("Table created")
 
 
-def SetupTicketTable(delete=False):
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-    cursor = conn.cursor()
+def SetupTicketTable(cursor, conn, delete=False):
 
     if (delete):
         cursor.execute("""
@@ -87,16 +74,11 @@ CREATE TABLE IF NOT EXISTS Tickets (
 """)
     conn.commit()
 
-    cursor.close()
-    conn.close()
-
     if (delete):
         print("Table created")
 
 
-def SetupLevelTable(delete=False):
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-    cursor = conn.cursor()
+def SetupLevelTable(cursor, conn, delete=False):
 
     if (delete):
         cursor.execute("""
@@ -118,9 +100,6 @@ CREATE TABLE IF NOT EXISTS Levels (
 )
 """)
     conn.commit()
-
-    cursor.close()
-    conn.close()
 
     if (delete):
         print("Table created")
