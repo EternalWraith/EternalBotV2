@@ -24,28 +24,24 @@ class Defcon(commands.Cog):
     @commands.check_any(EternalChecks.has_killswitch())
     async def resetconfigtable(self, ctx):
         self.bot.Configs = {}
-        EternalTables.SetupConfigTable(True)
         await ctx.channel.send("Reset the Config table for you, Mr Wraith!")
 
     @commands.command(name="resetleveltable", hidden=True)
     @commands.check_any(EternalChecks.has_killswitch())
     async def resetleveltable(self, ctx):
         self.bot.Levels = {}
-        EternalTables.SetupLevelTable(True)
         await ctx.channel.send("Reset the Level table for you, Mr Wraith!")
 
     @commands.command(name="resetlobbytable", hidden=True)
     @commands.check_any(EternalChecks.has_killswitch())
     async def resetlobbytable(self, ctx):
         self.bot.Lobbies = {}
-        EternalTables.SetupLobbyTable(True)
         await ctx.channel.send("Reset the Lobby table for you, Mr Wraith!")
 
     @commands.command(name="resettickettable", hidden=True)
     @commands.check_any(EternalChecks.has_killswitch())
     async def resettickettable(self, ctx):
         self.bot.Tickets = {}
-        EternalTables.SetupTicketTable(True)
         await ctx.channel.send("Reset the Ticket table for you, Mr Wraith!")
 
     @resettickettable.error
