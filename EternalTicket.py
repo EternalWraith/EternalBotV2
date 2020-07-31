@@ -1,6 +1,8 @@
 import discord
 import os
 import EternalChecks
+import io
+import requests
 
 from discord.ext import commands
 
@@ -24,6 +26,13 @@ class Ticket(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        filetypes = (
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".gif"
+        )
+
         if not (message.guild):
             prefix = "e2-"
         else:
@@ -38,29 +47,83 @@ class Ticket(commands.Cog):
                 ticket = await self.findTicket(message.author)
                 if (ticket):
                     channel = ticket["Channel"]
-                    emb = discord.Embed(title="Response from User")
-                    emb.add_field(name="Message", value=message.content)
-                    emb.set_footer(
-                        text="%s#%s" % (
-                                    message.author.name,
-                                    message.author.discriminator
-                                ),
-                        icon_url=message.author.avatar_url)
-                    await channel.send(embed=emb)
-            else:
-                if (message.channel.id in self.bot.Tickets):
-                    ticket = self.bot.Tickets[message.channel.id]
-                    if not (ticket["Ending"]):
-                        emb = discord.Embed(title="Response from Mods")
+
+                    if message.content != "":
+                        emb = discord.Embed(title="Response from User")
                         emb.add_field(name="Message", value=message.content)
                         emb.set_footer(
                             text="%s#%s" % (
                                         message.author.name,
                                         message.author.discriminator
-                                        ),
-                            icon_url=message.author.avatar_url
-                        )
-                        await ticket["Owner"].send(embed=emb)
+                                    ),
+                            icon_url=message.author.avatar_url)
+                        await channel.send(embed=emb)
+
+                    if len(message.attachments) > 0:
+
+                        for att in message.attachments:
+                            if att.filename.lower().endswith(filetypes):
+                                emb = discord.Embed(
+                                    title="Attachment from User"
+                                )
+                                # xfile = await att.to_file()
+
+                                attachment = requests.get(att.url)
+                                bytes = io.BytesIO(attachment.content)
+                                file = discord.File(bytes, filename="file.png")
+
+                                emb.set_image(url="attachment://file.png")
+                                emb.set_footer(
+                                    text="%s#%s" % (
+                                                message.author.name,
+                                                message.author.discriminator
+                                            ),
+                                    icon_url=message.author.avatar_url)
+
+                                await channel.send(file=file, embed=emb)
+            else:
+                if (message.channel.id in self.bot.Tickets):
+                    ticket = self.bot.Tickets[message.channel.id]
+                    if not (ticket["Ending"]):
+
+                        if message.content != "":
+                            emb = discord.Embed(title="Response from Mods")
+                            emb.add_field(
+                                name="Message",
+                                value=message.content
+                            )
+                            emb.set_footer(
+                                text="%s#%s" % (
+                                            message.author.name,
+                                            message.author.discriminator
+                                            ),
+                                icon_url=message.author.avatar_url
+                            )
+                            await ticket["Owner"].send(embed=emb)
+
+                        for att in message.attachments:
+                            if att.filename.lower().endswith(filetypes):
+                                emb = discord.Embed(
+                                    title="Attachment from Mods"
+                                )
+                                # xfile = await att.to_file()
+
+                                attachment = requests.get(att.url)
+                                bytes = io.BytesIO(attachment.content)
+                                file = discord.File(bytes, filename="file.png")
+
+                                emb.set_image(url="attachment://file.png")
+                                emb.set_footer(
+                                    text="%s#%s" % (
+                                                message.author.name,
+                                                message.author.discriminator
+                                            ),
+                                    icon_url=message.author.avatar_url)
+
+                                await ticket["Owner"].send(
+                                    file=file,
+                                    embed=emb
+                                )
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
