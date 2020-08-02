@@ -56,16 +56,35 @@ class Level(commands.Cog):
     async def on_ready(self):
         print("Level Cog booted successfully")
 
+    async def formula(self, guild, base, level):
+        exp = 1.5
+        return round(base * (level**exp))+base
+
     async def calculate_xp(self, guild, user):
         level = self.bot.Levels[guild.id]["Levels"][user.id]["Level"]
-        a = round((4 * (level**3))/5)
+
         b = (self.bot.Levels[guild.id]["Gain"]["Min"]
              + self.bot.Levels[guild.id]["Gain"]["Max"]
              + self.bot.Levels[guild.id]["Gain"]["Voice"]) / 3
         c = (5+15+50)/3
         d = b/c
-        e = round(c*d)+a
-        return e
+        e = round(c*d)
+
+        a = await self.formula(guild, e, level)
+
+        return a
+
+    async def xp_from_level(self, guild, level):
+        b = (self.bot.Levels[guild.id]["Gain"]["Min"]
+             + self.bot.Levels[guild.id]["Gain"]["Max"]
+             + self.bot.Levels[guild.id]["Gain"]["Voice"]) / 3
+        c = (5+15+50)/3
+        d = b/c
+        e = round(c*d)
+
+        a = await self.formula(guild, e, level)
+
+        return a
 
     async def check_lvlup(self, user, guild, xp):
         next_xp = await self.calculate_xp(guild, user)
@@ -74,6 +93,20 @@ class Level(commands.Cog):
             xp -= next_xp
 
             self.bot.Levels[guild.id]["Levels"][user.id]["Level"] += 1
+            pre = self.bot.Levels[guild.id]["Levels"][user.id]["Prestige"]
+            level = self.bot.Levels[guild.id]["Levels"][user.id]["Level"]
+
+            if (pre >= len(self.bot.Levels[guild.id]["Prestiges"])):
+                cap = self.bot.Levels[guild.id]["LevelCap"]["Master"]
+            else:
+                cap = self.bot.Levels[guild.id]["LevelCap"]["Normal"]
+
+            if level > cap:
+                print("%s has reached the cap"
+                      % (user.name))
+                self.bot.Levels[guild.id]["Levels"][user.id]["Level"] = cap
+                return await self.xp_from_level(guild, cap)
+
             print("%s has leveled up to Level %s"
                   % (user.name,
                      self.bot.Levels[guild.id]["Levels"][user.id]["Level"]))
@@ -145,8 +178,8 @@ class Level(commands.Cog):
         now = datetime.now()
 
         if xpd["Cooldown"] <= now:
-            tenmin = timedelta(minutes=10)
-            self.bot.Levels[guild.id]["Levels"][user.id]["Cooldown"] += tenmin
+            tenmin = now + timedelta(minutes=10)
+            self.bot.Levels[guild.id]["Levels"][user.id]["Cooldown"] = tenmin
 
             xp = randint(self.bot.Levels[guild.id]["Gain"]["Min"],
                          self.bot.Levels[guild.id]["Gain"]["Max"])
@@ -249,19 +282,39 @@ class Level(commands.Cog):
             pos = (smallsize[1]+size, (smallsize[1]-av_off)-(fsize))
             draw.text(pos, str(xpd["Level"]), fill=col, font=fnt)
 
-            size = draw.textsize("/%s" % (str(needed)), font=fnt)[0]
-            pos = (
-                (smallsize[0]-(av_off//2))-size,
-                (smallsize[1]-av_off)-(fsize)
-            )
-            draw.text(pos, "/%s" % (str(needed)), fill="#ffffff", font=fnt)
+            pre = xpd["Prestige"]
 
-            size = draw.textsize(str(xpd["XP"]), font=fnt)[0]+size
-            pos = (
-                (smallsize[0]-(av_off//2))-size,
-                (smallsize[1]-av_off)-(fsize)
-            )
-            draw.text(pos, str(xpd["XP"]), fill=col, font=fnt)
+            if (pre >= len(self.bot.Levels[guild.id]["Prestiges"])):
+                cap = self.bot.Levels[guild.id]["LevelCap"]["Master"]
+            else:
+                cap = self.bot.Levels[guild.id]["LevelCap"]["Normal"]
+            capped = xpd["Level"] == cap and \
+                xpd["XP"] == await self.xp_from_level(
+                        guild,
+                        cap
+                    )
+
+            if not (capped):
+                size = draw.textsize("/%s" % (str(needed)), font=fnt)[0]
+                pos = (
+                    (smallsize[0]-(av_off//2))-size,
+                    (smallsize[1]-av_off)-(fsize)
+                )
+                draw.text(pos, "/%s" % (str(needed)), fill="#ffffff", font=fnt)
+
+                size = draw.textsize(str(xpd["XP"]), font=fnt)[0]+size
+                pos = (
+                    (smallsize[0]-(av_off//2))-size,
+                    (smallsize[1]-av_off)-(fsize)
+                )
+                draw.text(pos, str(xpd["XP"]), fill=col, font=fnt)
+            else:
+                size = draw.textsize("Max", font=fnt)[0]
+                pos = (
+                    (smallsize[0]-(av_off//2))-size,
+                    (smallsize[1]-av_off)-(fsize)
+                )
+                draw.text(pos, "Max", fill="#ffffff", font=fnt)
 
             # Place Name text on canvas
             ffnt = open("./helvetica.ttf", "rb")
@@ -336,7 +389,7 @@ class Level(commands.Cog):
         guild = ctx.guild
         print("Adding %s to prestige for %s" % (role, guild))
         if await self.check_enabled(guild):
-            self.bot.AddPrestige(guild, role)
+            await self.bot.AddPrestige(guild, role)
 
             prestiges = len(self.bot.Levels[guild.id]["Prestiges"])
             pstr = str(prestiges)
@@ -354,6 +407,65 @@ class Level(commands.Cog):
                 % (pstr, suf, role.mention),
                 delete_after=10
             )
+        await ctx.message.delete()
+
+    @commands.command(name="givexp")
+    @commands.check_any(EternalChecks.is_whitelisted())
+    @commands.guild_only()
+    async def givexp(self, ctx, *, xp: int, user: discord.Member = None):
+        if not user:
+            user = ctx.author
+
+        guild = ctx.guild
+
+        print("%s earned %s XP" % (user.name, xp))
+        xp += self.bot.Levels[guild.id]["Levels"][user.id]["XP"]
+        xp = await self.check_lvlup(user, guild, xp)
+        self.bot.Levels[guild.id]["Levels"][user.id]["XP"] = xp
+
+    @commands.command(name="prestige")
+    @commands.guild_only()
+    async def prestige(self, ctx):
+        guild = ctx.guild
+        user = ctx.author
+        if await self.check_enabled(guild):
+            xpd = await self.check_xp(guild, self.bot.get_user(user.id))
+
+            cap = self.bot.Levels[guild.id]["LevelCap"]["Normal"]
+            prestiges = len(self.bot.Levels[guild.id]["Prestiges"])
+            capped = xpd["Level"] == cap and \
+                xpd["XP"] == await self.xp_from_level(
+                        guild,
+                        cap
+                    )
+
+            if (xpd["Prestige"] >= prestiges):
+                await ctx.channel.send(
+                    "You're already in the final prestige, %s"
+                    % (user.mention),
+                    delete_after=10)
+                await ctx.message.delete()
+                return
+
+            if (capped):
+                self.bot.Levels[guild.id]["Levels"][user.id]["Prestige"] += 1
+                pre = self.bot.Levels[guild.id]["Levels"][user.id]["Prestige"]
+                self.bot.Levels[guild.id]["Levels"][user.id]["Level"] = 0
+                self.bot.Levels[guild.id]["Levels"][user.id]["XP"] = 0
+                print(self.bot.Levels[guild.id]["Prestiges"])
+                await user.add_roles(
+                    *self.bot.Levels[guild.id]["Prestiges"][0:pre+1]
+                )
+                await ctx.channel.send(
+                    "Congrats, %s!"
+                    " You just prestiged up to Prestige %s "
+                    % (user.mention, pre),
+                    delete_after=10)
+            else:
+                await ctx.channel.send(
+                    "You haven't reached the right level to prestige, %s"
+                    % (user.mention),
+                    delete_after=10)
         await ctx.message.delete()
 
 
