@@ -130,7 +130,7 @@ class Level(commands.Cog):
                 return
             guild = before.channel.guild
 
-        user = await self.check_xp(guild, member)["User"]
+        user = (await self.check_xp(guild, member))["User"]
         now = datetime.now()
 
         def convert_time(time):
