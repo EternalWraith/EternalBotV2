@@ -188,7 +188,8 @@ class Lobby(commands.Cog):
                         self.bot.Lobbies.pop(ctx.author.id)
                         await ctx.message.delete()
                     else:
-                        await vc.edit(overwrites=lobby.overwrites)
+
+                        await vc.edit(sync_permissions=True)
                         await ctx.message.delete()
                 except Exception as e:
                     print(e)
