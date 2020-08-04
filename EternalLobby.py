@@ -188,11 +188,7 @@ class Lobby(commands.Cog):
                         self.bot.Lobbies.pop(ctx.author.id)
                         await ctx.message.delete()
                     else:
-                        overwrites = {
-                            ctx.guild.default_role: canjoin,
-                            ctx.message.author: canjoin
-                        }
-                        await vc.edit(overwrites=overwrites)
+                        await vc.edit(overwrites=lobby.overwrites)
                         await ctx.message.delete()
                 except Exception as e:
                     print(e)
