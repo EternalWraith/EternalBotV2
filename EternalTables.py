@@ -21,7 +21,10 @@ CREATE TABLE IF NOT EXISTS Config (
     Lobbies VARCHAR(255)[][4],
     TicketID VARCHAR(255),
     "Tickets" int,
-    WhiteList VARCHAR(255)[]
+    WhiteList VARCHAR(255)[],
+    RoleReacts VARCHAR(255)[][],
+    TicketMessage VARCHAR(255)[2]
+
     -- Lang VARCHAR(255)
 )
 """)

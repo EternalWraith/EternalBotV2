@@ -50,13 +50,34 @@ class EternalBot(commands.Bot):
                 "Audit": None if not config[2] else
                 bot.get_channel(int(config[2])),
                 "Prefix": config[3],
-                "Lobbies": {},
+                "Lobbies": {},  # 4
                 "Inbox": None if not config[5] else
                 bot.get_channel(int(config[5])),
                 "Tickets": int(config[6]),
-                "Whitelist": [],
-                "Lang": "English"
+                "Whitelist": [],  # 7
+                "Lang": "English",
+                "RoleReacts": [],  # 8
+                "TicketMessage": {
+                    "Channel": None,
+                    "Message": None
+                }
             }
+
+            if not config[9]:
+                pass
+            else:
+                try:
+                    self.Configs[guildId]["TicketMessage"] = {
+                        "Channel": None if not config[9][0] else
+                        bot.get_channel(int(config[9][0])),
+                        "Message": None if not config[9][0] else
+                        await bot.get_channel(int(config[9][0])).fetch_message(
+                            int(config[9][1])
+                        )
+                    }
+                except Exception as e:
+                    print("Error %s" % (e))
+                    pass
 
             for lobby in config[4]:
                 lobbyId = int(lobby[0])
@@ -81,7 +102,12 @@ class EternalBot(commands.Bot):
             "Lobbies": {},
             "Inbox": None,
             "Tickets": 0,
-            "Whitelist": []
+            "Whitelist": [],
+            "RoleReacts": [],
+            "TicketMessage": {
+                "Channel": None,
+                "Message": None
+            }
         }
 
     async def AddLobbyCategory(self, guildId, categoryId, channelId, limit):
@@ -274,6 +300,15 @@ class EternalBot(commands.Bot):
                 inbox = None
             else:
                 inbox = config["Inbox"].id
+
+            if not (config["TicketMessage"]["Channel"]):
+                mess = []
+            else:
+                mess = [
+                    config["TicketMessage"]["Channel"].id,
+                    config["TicketMessage"]["Message"].id
+                ]
+
             code = """
 INSERT INTO Config (ServerID,
                     AuditID,
@@ -281,8 +316,10 @@ INSERT INTO Config (ServerID,
                     Lobbies,
                     TicketID,
                     "Tickets",
-                    WhiteList)
-VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+                    WhiteList,
+                    RoleReacts,
+                    TicketMessage)
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             values = (
                 config["Server"].id,
                 audit,
@@ -290,7 +327,9 @@ VALUES (%s, %s, %s, %s, %s, %s, %s)"""
                 await self.CompileLobbyCategories(c),
                 inbox,
                 config["Tickets"],
-                await self.CompileRoleWhitelist(c)
+                await self.CompileRoleWhitelist(c),
+                [],
+                mess
             )
             self.Cursor.execute(code, values)
         self.Conn.commit()
