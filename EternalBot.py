@@ -48,20 +48,61 @@ class EternalBot(commands.Bot):
                 # "ID": int(config[0]),
                 "Server": self.get_guild(guildId),
                 "Audit": None if not config[2] else
-                bot.get_channel(int(config[2])),
+                self.get_channel(int(config[2])),
                 "Prefix": config[3],
                 "Lobbies": {},  # 4
                 "Inbox": None if not config[5] else
-                bot.get_channel(int(config[5])),
+                self.get_channel(int(config[5])),
                 "Tickets": int(config[6]),
                 "Whitelist": [],  # 7
                 "Lang": "English",
-                "RoleReacts": [],  # 8
+                "RoleReacts": {},  # 8
                 "TicketMessage": {
                     "Channel": None,
                     "Message": None
                 }
             }
+
+            if config[8]:
+                for reacts in config[8]:
+                    messageid = int(reacts[0])
+                    channelid = reacts[1]
+                    channel = bot.get_channel(int(channelid))
+                    message = await channel.fetch_message(messageid)
+                    if message:
+                        self.Configs[guildId]["RoleReacts"][messageid] = {
+                            "Message": message,
+                            "Channel": channel
+                        }
+                        for i in range(2, len(reacts), 3):
+                            emojitype = reacts[i]
+                            emojiid = reacts[i+1]
+                            roleid = int(reacts[i+2])
+
+                            if emojitype == "str":
+                                role = self.get_guild(guildId).get_role(roleid)
+                                if role:
+                                    (self.Configs[guildId]["RoleReacts"]
+                                     [messageid][emojiid]) = {
+                                        "Type": emojitype,
+                                        "Role": role
+                                    }
+                            elif emojitype == "emj":
+                                emoji = self.get_guild(guildId).get_emoji(
+                                    int(emojiid)
+                                )
+                                role = self.get_guild(guildId).get_role(roleid)
+                                if role and emoji:
+                                    (self.Configs[guildId]
+                                                 ["RoleReacts"]
+                                                 [messageid]
+                                                 [int(emojiid)]) = {
+                                        "Type": emojitype,
+                                        "Emoji": emoji,
+                                        "Role": role
+                                    }
+            else:
+                print("Config RoleReacts is NULL")
 
             if not config[9]:
                 pass
@@ -69,9 +110,11 @@ class EternalBot(commands.Bot):
                 try:
                     self.Configs[guildId]["TicketMessage"] = {
                         "Channel": None if not config[9][0] else
-                        bot.get_channel(int(config[9][0])),
+                        self.get_channel(int(config[9][0])),
                         "Message": None if not config[9][0] else
-                        await bot.get_channel(int(config[9][0])).fetch_message(
+                        await self.get_channel(
+                            int(config[9][0])
+                        ).fetch_message(
                             int(config[9][1])
                         )
                     }
@@ -83,8 +126,8 @@ class EternalBot(commands.Bot):
                 lobbyId = int(lobby[0])
                 channelId = int(lobby[1])
                 self.Configs[guildId]["Lobbies"][lobbyId] = {
-                    "Category": bot.get_channel(lobbyId),
-                    "Channel": bot.get_channel(channelId),
+                    "Category": self.get_channel(lobbyId),
+                    "Channel": self.get_channel(channelId),
                     "Limit": int(lobby[2])
                 }
 
@@ -112,8 +155,8 @@ class EternalBot(commands.Bot):
 
     async def AddLobbyCategory(self, guildId, categoryId, channelId, limit):
         self.Configs[guildId]["Lobbies"][categoryId] = {
-            "Category": bot.get_channel(categoryId),
-            "Channel": bot.get_channel(channelId),
+            "Category": self.get_channel(categoryId),
+            "Channel": self.get_channel(channelId),
             "Limit": limit
         }
 
@@ -125,7 +168,7 @@ class EternalBot(commands.Bot):
             guildId = int(ticket[1])
             ownerId = int(ticket[2])
             channelId = int(ticket[3])
-            channel = bot.get_channel(channelId)
+            channel = self.get_channel(channelId)
 
             if not ticket[4]:
                 ending = None
@@ -134,18 +177,18 @@ class EternalBot(commands.Bot):
 
             self.Tickets[channelId] = {
                 # "ID": int(ticket[0]),
-                "Server": bot.get_guild(guildId),
+                "Server": self.get_guild(guildId),
                 "Channel": channel,
-                "Owner": bot.get_user(ownerId),
+                "Owner": self.get_user(ownerId),
                 "Ending": ending
             }
 
     async def AddTicket(self, guildId, channelId, ownerId):
         self.Tickets[channelId] = {
             # "ID": int(ticket[0]),
-            "Server": bot.get_guild(guildId),
-            "Channel": bot.get_channel(channelId),
-            "Owner": bot.get_user(ownerId),
+            "Server": self.get_guild(guildId),
+            "Channel": self.get_channel(channelId),
+            "Owner": self.get_user(ownerId),
             "Ending": None
         }
         self.Configs[guildId]["Tickets"] += 1
@@ -161,17 +204,17 @@ class EternalBot(commands.Bot):
 
             self.Lobbies[ownerId] = {
                 # "ID": int(lobby[0]),
-                "Server": bot.get_guild(guildId),
-                "Channel": bot.get_channel(channelId),
-                "Owner": bot.get_user(ownerId)
+                "Server": self.get_guild(guildId),
+                "Channel": self.get_channel(channelId),
+                "Owner": self.get_user(ownerId)
             }
 
     async def AddLobby(self, guildId, channelId, ownerId):
         self.Lobbies[ownerId] = {
             # "ID": int(ticket[0]),
-            "Server": bot.get_guild(guildId),
-            "Channel": bot.get_channel(channelId),
-            "Owner": bot.get_user(ownerId)
+            "Server": self.get_guild(guildId),
+            "Channel": self.get_channel(channelId),
+            "Owner": self.get_user(ownerId)
         }
 
     async def GrabLevels(self):
@@ -182,7 +225,7 @@ class EternalBot(commands.Bot):
             guildId = int(server[1])
             self.Levels[guildId] = {
                 # "ID": int(server[0]),
-                "Server": bot.get_guild(guildId),
+                "Server": self.get_guild(guildId),
                 "Enabled": server[2],
                 "Levels": {},
                 "Prestiges": [],
@@ -199,7 +242,7 @@ class EternalBot(commands.Bot):
 
             if (self.Levels[guildId]["Enabled"]):
                 for member in server[3]:
-                    user = bot.get_user(int(member[0]))
+                    user = self.get_user(int(member[0]))
                     if (user):
                         self.Levels[guildId]["Levels"][user.id] = {
                             "User": user,
@@ -209,7 +252,7 @@ class EternalBot(commands.Bot):
                         }
                 for member in server[7]:
                     timeformat = "%Y-%m-%d %H:%M:%S.%f"
-                    user = bot.get_user(int(member[0]))
+                    user = self.get_user(int(member[0]))
                     if (user):
                         self.Levels[guildId]["Levels"][user.id].update({
                             "Cooldown": datetime.strptime(
@@ -285,6 +328,27 @@ class EternalBot(commands.Bot):
             ])
         return output
 
+    async def CompileMessageReacts(self, guildId):
+        output = []
+        for message in self.Configs[guildId]["RoleReacts"]:
+            input = []
+            for ind in self.Configs[guildId]["RoleReacts"][message]:
+                if ind in ["Message", "Channel"]:
+                    input.append(
+                        str(
+                            (self.Configs[guildId]["RoleReacts"]
+                                [message][ind]).id
+                        )
+                    )
+                else:
+                    thisind = self.Configs[guildId]["RoleReacts"][message][ind]
+                    input.append(thisind["Type"])
+                    input.append(ind)
+                    input.append(str(thisind["Role"].id))
+
+            output.append(input)
+        return output
+
     async def close(self):
         await super().close()
 
@@ -328,7 +392,7 @@ VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
                 inbox,
                 config["Tickets"],
                 await self.CompileRoleWhitelist(c),
-                [],
+                await self.CompileMessageReacts(c),
                 mess
             )
             self.Cursor.execute(code, values)
@@ -414,6 +478,7 @@ bot.load_extension("EternalLobby")
 bot.load_extension("EternalTicket")
 bot.load_extension("EternalModerate")
 bot.load_extension("EternalLevel")
+bot.load_extension("EternalRoles")
 
 bot.load_extension("EternalDefcon")
 
@@ -427,10 +492,12 @@ async def on_ready():
                         type=1,
                         url="http://twitch.tv/TheRealWraithGG")
 
-    print(bot.Configs)
-    print(bot.Lobbies)
-    print(bot.Tickets)
-    print(bot.Levels)
+    # print(bot.Configs)
+    # print(bot.Lobbies)
+    # print(bot.Tickets)
+    # print(bot.Levels)
+    for i in bot.Configs:
+        print(bot.Configs[i]["RoleReacts"])
     await bot.change_presence(activity=game)
 
 
