@@ -70,9 +70,12 @@ class Ticket(commands.Cog):
 
                                 attachment = requests.get(att.url)
                                 bytes = io.BytesIO(attachment.content)
-                                file = discord.File(bytes, filename="file.png")
+                                ext = att.filename.lower().split(".")[-1]
+                                file = discord.File(bytes,
+                                                    filename="file."+ext
+                                                    )
 
-                                emb.set_image(url="attachment://file.png")
+                                emb.set_image(url="attachment://file."+ext)
                                 emb.set_footer(
                                     text="%s#%s" % (
                                                 message.author.name,
@@ -110,9 +113,11 @@ class Ticket(commands.Cog):
 
                                 attachment = requests.get(att.url)
                                 bytes = io.BytesIO(attachment.content)
-                                file = discord.File(bytes, filename="file.png")
+                                file = discord.File(bytes,
+                                                    filename="file."+ext
+                                                    )
 
-                                emb.set_image(url="attachment://file.png")
+                                emb.set_image(url="attachment://file."+ext)
                                 emb.set_footer(
                                     text="%s#%s" % (
                                                 message.author.name,
