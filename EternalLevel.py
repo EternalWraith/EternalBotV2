@@ -173,6 +173,7 @@ class Level(commands.Cog):
 
         guild = message.guild
         user = self.bot.get_user(message.author.id)
+        print(guild, user)
         xpd = await self.check_xp(guild, user)
         now = datetime.now()
 

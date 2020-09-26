@@ -153,29 +153,34 @@ class Ticket(commands.Cog):
                 else:
                     await channel.fetch_message(id).remove_reaction(emoji,
                                                                     member)
-        elif (channel.id ==
-              self.bot.Configs[guild.id]["TicketMessage"]["Channel"].id) and (
-              messageid ==
-              self.bot.Configs[guild.id]["TicketMessage"]["Message"].id
-              ):
-            envelope = "\U00002709"
-            if (emoji == envelope):
-                await self.maketicket(
-                    guild,
-                    channel,
-                    member,
-                    self.bot.Configs[guild.id]["TicketMessage"]["Message"],
-                    "Created ticket through reaction"
-                )
-                await (await channel.fetch_message(messageid)).remove_reaction(
-                    emoji,
-                    member
-                )
-            else:
-                await (await channel.fetch_message(messageid)).remove_reaction(
-                    emoji,
-                    member
-                )
+        elif (self.bot.Configs[guild.id]["TicketMessage"]["Channel"]
+              is not None):
+            if (channel.id ==
+                self.bot.Configs[guild.id]["TicketMessage"]["Channel"].id and
+                messageid ==
+               self.bot.Configs[guild.id]["TicketMessage"]["Message"].id):
+                envelope = "\U00002709"
+                if (emoji == envelope):
+                    await self.maketicket(
+                        guild,
+                        channel,
+                        member,
+                        self.bot.Configs[guild.id]["TicketMessage"]["Message"],
+                        "Created ticket through reaction"
+                    )
+                    await (
+                        await channel.fetch_message(messageid)
+                    ).remove_reaction(
+                        emoji,
+                        member
+                    )
+                else:
+                    await (
+                        await channel.fetch_message(messageid)
+                    ).remove_reaction(
+                        emoji,
+                        member
+                    )
 
     @commands.command(name="setuptickets")
     @commands.check_any(EternalChecks.is_whitelisted())
