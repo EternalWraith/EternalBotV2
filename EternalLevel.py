@@ -173,7 +173,8 @@ class Level(commands.Cog):
 
         guild = message.guild
         user = self.bot.get_user(message.author.id)
-        print(guild, user)
+        if user is None:
+            return
         xpd = await self.check_xp(guild, user)
         now = datetime.now()
 
