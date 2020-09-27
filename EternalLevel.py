@@ -148,7 +148,7 @@ class Level(commands.Cog):
                   self.bot.Levels[guild.id]["Levels"][user.id]["Stay"],
                   stay.seconds)
             spent = convert_time(stay)
-            reward = spent/2
+            reward = spent/5
 
             xp = round(self.bot.Levels[guild.id]["Gain"]["Voice"]*reward)
             print("%s spent %s minutes in the voice chat, they earned %s xp"
@@ -179,7 +179,7 @@ class Level(commands.Cog):
         now = datetime.now()
 
         if xpd["Cooldown"] <= now:
-            tenmin = now + timedelta(minutes=10)
+            tenmin = now + timedelta(minutes=2)
             self.bot.Levels[guild.id]["Levels"][user.id]["Cooldown"] = tenmin
 
             xp = randint(self.bot.Levels[guild.id]["Gain"]["Min"],
