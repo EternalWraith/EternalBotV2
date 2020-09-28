@@ -426,7 +426,8 @@ class Level(commands.Cog):
         self.bot.Levels[guild.id]["Levels"][user.id]["XP"] = xp
         await ctx.channel.send("%s was given %s XP" % (
             user.mention, ixp
-        ))
+        ), delete_after=10)
+        await ctx.message.delete()
 
     @givexp.error
     async def xp_error(self, ctx, error):
