@@ -43,14 +43,15 @@ class Moderate(commands.Cog):
     @commands.command(name="whitelist")
     @commands.check_any(EternalChecks.is_topdog())
     async def whitelist(self, ctx, *, role: discord.Role):
-        if (role in self.bot.Configs["Whitelist"]):
-            self.bot.Configs["Whitelist"].remove(role)
+        guild = ctx.message.guild
+        if (role in self.bot.Configs[guild.id]["Whitelist"]):
+            self.bot.Configs[guild.id]["Whitelist"].remove(role)
             await ctx.channel.send(
                 "Removed %s from the whitelist,"
                 " now they have less power than me without cookies"
                 % (role.mention))
         else:
-            self.bot.Configs["Whitelist"].append(role)
+            self.bot.Configs[guild.id]["Whitelist"].append(role)
             await ctx.channel.send(
                 "Whitelisted %s for you,"
                 " so now they can use the STRONG commands"
@@ -59,7 +60,8 @@ class Moderate(commands.Cog):
     @commands.command(name="prefix")
     @commands.check_any(EternalChecks.is_whitelisted())
     async def prefix(self, ctx, *, symbol: str = None):
-        if not ctx.message.guild:
+        guild = ctx.message.guild
+        if not guild:
             await ctx.channel.send(
                 "This command can only be used in a server by an admin."
                 " Sorry pal.")
@@ -67,9 +69,9 @@ class Moderate(commands.Cog):
 
         if not symbol:
             await ctx.channel.send("My command prefix for your server is '%s'"
-                                   % (self.bot.Configs["Prefix"]))
+                                   % (self.bot.Configs[guild.id]["Prefix"]))
         else:
-            self.bot.Configs["Prefix"] = symbol
+            self.bot.Configs[guild.id]["Prefix"] = symbol
             await ctx.channel.send(
                 "My command prefix for your server is now set to '%s'!"
                 % (symbol))
