@@ -414,6 +414,7 @@ class Level(commands.Cog):
     @commands.check_any(EternalChecks.is_whitelisted())
     @commands.guild_only()
     async def givexp(self, ctx, *, xp: int, user: discord.Member = None):
+        ixp = xp
         if not user:
             user = ctx.author
 
@@ -424,7 +425,7 @@ class Level(commands.Cog):
         xp = await self.check_lvlup(user, guild, xp)
         self.bot.Levels[guild.id]["Levels"][user.id]["XP"] = xp
         await ctx.channel.send("%s was given %s XP" % (
-            user.mention, xp
+            user.mention, ixp
         ))
 
     @givexp.error
