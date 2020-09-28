@@ -43,15 +43,14 @@ class Moderate(commands.Cog):
     @commands.command(name="whitelist")
     @commands.check_any(EternalChecks.is_topdog())
     async def whitelist(self, ctx, *, role: discord.Role):
-
-        if (role in self.bot.Configs["WhiteList"]):
-            self.bot.Configs["WhiteList"].remove(role)
+        if (role in self.bot.Configs["Whitelist"]):
+            self.bot.Configs["Whitelist"].remove(role)
             await ctx.channel.send(
                 "Removed %s from the whitelist,"
                 " now they have less power than me without cookies"
                 % (role.mention))
         else:
-            self.bot.Configs["WhiteList"].append(role)
+            self.bot.Configs["Whitelist"].append(role)
             await ctx.channel.send(
                 "Whitelisted %s for you,"
                 " so now they can use the STRONG commands"
