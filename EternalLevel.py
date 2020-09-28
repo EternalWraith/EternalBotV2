@@ -423,6 +423,17 @@ class Level(commands.Cog):
         xp += self.bot.Levels[guild.id]["Levels"][user.id]["XP"]
         xp = await self.check_lvlup(user, guild, xp)
         self.bot.Levels[guild.id]["Levels"][user.id]["XP"] = xp
+        await ctx.channel.send("%s was given %s XP" % (
+            user.mention, xp
+        ))
+
+    @givexp.error
+    async def xp_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            await ctx.channel.send(
+                "Only Whitelisted or Admin roles can use this command."
+                " Sorry pal."
+            )
 
     @commands.command(name="prestige")
     @commands.guild_only()
