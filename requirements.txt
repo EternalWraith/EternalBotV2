@@ -2,6 +2,6 @@ psycopg2
 discord.py==1.5.1
 discord.py[voice]
 asyncio
-pillow==8.0.1
+pillow==8.1.1
 requests
 typing
